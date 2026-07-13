@@ -1,5 +1,3 @@
-import { useState } from 'react'
-
 const OFFERINGS = [
   {
     tag: 'Youth',
@@ -28,56 +26,7 @@ const OFFERINGS = [
   },
 ]
 
-// To collect real signups, drop a form endpoint here (Formspree, Mailchimp,
-// Buttondown, a Google Form, or your own API) via a Vite env var. Create a
-// `.env` file with e.g. VITE_WAITLIST_ENDPOINT="https://formspree.io/f/xxxx".
-// Until then, submissions are stored in the browser so the form still works.
-const WAITLIST_ENDPOINT = import.meta.env.VITE_WAITLIST_ENDPOINT
-
 function App() {
-  const [email, setEmail] = useState('')
-  const [status, setStatus] = useState('idle') // idle | loading | success | error
-  const [message, setMessage] = useState('')
-
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-
-    const trimmed = email.trim()
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
-      setStatus('error')
-      setMessage('That email looks off. Mind checking it?')
-      return
-    }
-
-    setStatus('loading')
-    setMessage('')
-
-    try {
-      if (WAITLIST_ENDPOINT) {
-        const res = await fetch(WAITLIST_ENDPOINT, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-          body: JSON.stringify({ email: trimmed }),
-        })
-        if (!res.ok) throw new Error('Request failed')
-      } else {
-        // Fallback: no endpoint configured yet — persist locally so the
-        // form is fully functional during the placeholder phase.
-        const key = 'overplay_waitlist'
-        const saved = JSON.parse(localStorage.getItem(key) || '[]')
-        if (!saved.includes(trimmed)) saved.push(trimmed)
-        localStorage.setItem(key, JSON.stringify(saved))
-      }
-
-      setStatus('success')
-      setMessage("You're on the list. We'll holler before the lights come on.")
-      setEmail('')
-    } catch {
-      setStatus('error')
-      setMessage('Something jammed on our end. Try again in a sec.')
-    }
-  }
-
   return (
     <div className="page">
       <div className="stripes" aria-hidden="true" />
@@ -137,38 +86,8 @@ function App() {
         <p className="subhead">
           Five-a-side soccer under the floodlights. Youth technical training,
           adult leagues, pickup memberships, and a rentable urban arena built
-          for events. Drop your email and be first through the gate.
+          for events. A new home for the game is on the way.
         </p>
-
-        <div className="capture-panel">
-          <form className="capture" onSubmit={handleSubmit} noValidate>
-            <input
-              type="email"
-              className="capture-input"
-              placeholder="you@email.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              aria-label="Email address"
-              disabled={status === 'loading'}
-            />
-            <button
-              type="submit"
-              className="capture-btn"
-              disabled={status === 'loading'}
-            >
-              {status === 'loading' ? 'Joining…' : 'Join the waitlist'}
-            </button>
-          </form>
-
-          {message && (
-            <p
-              className={`form-msg ${status === 'error' ? 'is-error' : 'is-success'}`}
-              role="status"
-            >
-              {message}
-            </p>
-          )}
-        </div>
       </main>
 
       <section className="offerings" aria-label="What's coming">
